@@ -23,8 +23,12 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/**").permitAll() // 인증 없이 접근 가능한 경로
-                //.anyRequest().authenticated() // 나머지 경로는 인증 필요
-            );
+                .requestMatchers("/h2-console/**").permitAll()
+                .anyRequest().authenticated() // 나머지 경로는 인증 필요
+            )
+            .headers(headers -> headers
+                    .disable() // 모든 헤더 보호 비활성화 (H2 콘솔 접근을 위한 설정)
+                );
         return http.build();
     }
 }

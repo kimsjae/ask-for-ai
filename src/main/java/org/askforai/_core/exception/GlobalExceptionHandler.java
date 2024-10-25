@@ -8,6 +8,7 @@ import org.askforai._core.exception.custom.Exception409;
 import org.askforai._core.exception.custom.Exception500;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -16,61 +17,70 @@ import lombok.extern.slf4j.Slf4j;
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+	private ResponseEntity<String> handleException(HttpStatus status, Exception ex) {
+        return ResponseEntity
+                .status(status)
+                .body(ex.getMessage());
+    }
+	private ResponseEntity<String> handleException(HttpStatus status, String msg) {
+        return ResponseEntity
+                .status(status)
+                .body(msg);
+    }
+	
+	
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
+	    StringBuilder errorMessage = new StringBuilder("유효성 검사 실패: ");
+	    
+	    ex.getBindingResult().getFieldErrors().forEach(error -> {
+	        errorMessage.append(error.getField())
+	                    .append(": ")
+	                    .append(error.getDefaultMessage())
+	                    .append("; ");
+	    });
+	    
+	    return ResponseEntity
+	            .status(HttpStatus.BAD_REQUEST)
+	            .body(errorMessage.toString());
+	}
 
     @ExceptionHandler(Exception400.class)
     public ResponseEntity<String> ex400(Exception400 ex) {
-        log.warn("400 오류 발생: {}", ex.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ex.getMessage());
+    	return handleException(HttpStatus.BAD_REQUEST, ex);
     }
     
     @ExceptionHandler(Exception401.class)
     public ResponseEntity<String> ex401(Exception401 ex) {
-        log.warn("401 오류 발생: {}", ex.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(ex.getMessage());
+    	return handleException(HttpStatus.UNAUTHORIZED, ex);
     }
     
     @ExceptionHandler(Exception403.class)
     public ResponseEntity<String> ex403(Exception403 ex) {
-        log.warn("403 오류 발생: {}", ex.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body(ex.getMessage());
+    	return handleException(HttpStatus.FORBIDDEN, ex);
     }
     
     @ExceptionHandler(Exception404.class)
     public ResponseEntity<String> ex404(Exception404 ex) {
-        log.warn("404 오류 발생: {}", ex.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(ex.getMessage());
+    	return handleException(HttpStatus.NOT_FOUND, ex);
     }
     
-    // 중복
     @ExceptionHandler(Exception409.class)
-    public ResponseEntity<String> ex404(Exception409 ex) {
-        log.warn("409 오류 발생: {}", ex.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(ex.getMessage());
+    public ResponseEntity<String> ex409(Exception409 ex) {
+        return handleException(HttpStatus.CONFLICT, ex);
     }
     
     @ExceptionHandler(Exception500.class)
     public ResponseEntity<String> ex500(Exception500 ex) {
-        log.error("서버 오류 발생: {}", ex.getMessage(), ex);
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("서버 오류가 발생했습니다: " + ex.getMessage());
+    	return handleException(HttpStatus.INTERNAL_SERVER_ERROR, "서버오류!!!");
     }
     
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleAllExceptions(Exception ex) {
-        log.error("예기치 않은 오류 발생: {}", ex.getMessage(), ex);
+    public ResponseEntity<String> ex(Exception ex) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("예기치 않은 오류가 발생했습니다.: " + ex.getMessage());
+                .body("예기치 않은 오류가 발생했습니다.");
     }
+    
+    
 }

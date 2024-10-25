@@ -19,9 +19,13 @@ public class UserService {
 	
 	public User signup(UserRequest.SignupDTO reqDTO) {
 		log.info("회원가입 시도: {}", reqDTO);
-		Optional<User> userOp = userRepository.findByUsername(reqDTO.getUsername());
-		if (userOp.isPresent()) {
-			throw new Exception409("중복된 username 입니다.");
+		Optional<User> username = userRepository.findByUsername(reqDTO.getUsername());
+		if (username.isPresent()) {
+			throw new Exception409("이미 존재하는 username 입니다.");
+		}
+		Optional<User> email = userRepository.findByEmail(reqDTO.getEmail());
+		if (email.isPresent()) {
+			throw new Exception409("이미 존재하는 email 입니다.");
 		}
 		
 		String encryptedPassword = bCryptUtil.encryptPassword(reqDTO.getPassword());

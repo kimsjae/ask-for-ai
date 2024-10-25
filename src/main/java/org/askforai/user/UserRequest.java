@@ -13,7 +13,7 @@ public class UserRequest {
 		private String username;
 		
 		@NotBlank(message = "password을 입력하세요.")
-		@Size(min = 4, max = 12, message = "password은 4자 이상 12자 이하입니다.")
+		@Size(min = 4, max = 12, message = "password는 4자 이상 12자 이하입니다.")
 		private String password;
 		
 		@NotBlank(message = "name을 입력하세요.")
