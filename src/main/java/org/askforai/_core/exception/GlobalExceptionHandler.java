@@ -28,7 +28,6 @@ public class GlobalExceptionHandler {
                 .body(msg);
     }
 	
-	
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<String> handleValidationExceptions(MethodArgumentNotValidException ex) {
 	    StringBuilder errorMessage = new StringBuilder("유효성 검사 실패: ");

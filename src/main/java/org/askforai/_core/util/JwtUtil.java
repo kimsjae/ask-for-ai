@@ -1,28 +1,51 @@
 package org.askforai._core.util;
 
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
+import javax.crypto.SecretKey;
+
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
 
-	// 로컬 환경변수에 비밀키 저장
-	@Value("$(JWT_SECRET_KEY}")
-    private String SECRET_KEY;
-    private final long EXPIRATION_TIME = 1000 * 60 * 60;
+    private final SecretKey SECRET_KEY;
+    private final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 60; // 1시간
+//    private final long REFRESH_TOKEN_VALIDITY = 1000 * 60 * 60 * 24 * 30; // 30일
 
-    // JWT 생성
-    public String generateToken(String username) {
+    public JwtUtil() {
+        String secretKeyEnv = System.getenv("JWT_SECRET_KEY");
+        SECRET_KEY = Keys.hmacShaKeyFor(Base64.getDecoder().decode(secretKeyEnv));
+    }
+
+    // Access Token 생성
+    public String generateAccessToken(String username) {
+        return createToken(username, ACCESS_TOKEN_VALIDITY);
+    }
+
+//    // Refresh Token 생성
+//    public String generateRefreshToken(String username) {
+//        return createToken(username, REFRESH_TOKEN_VALIDITY);
+//    }
+    
+    // JWT 생성 시 클레임 설정
+    private String createToken(String username, long validity) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, username);
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(username)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + validity))
+                .signWith(SECRET_KEY, SignatureAlgorithm.HS256) // Secret Key와 알고리즘 설정
+                .compact();
     }
 
     // JWT 유효성 검사
@@ -38,18 +61,11 @@ public class JwtUtil {
 
     // JWT에서 모든 클레임 추출
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
-    }
-
-    // JWT 생성 시 클레임 설정
-    private String createToken(Map<String, Object> claims, String subject) {
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-                .compact();
+        return Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY) // Secret Key 설정
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     // JWT 만료 여부 확인

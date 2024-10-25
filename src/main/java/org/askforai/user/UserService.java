@@ -2,10 +2,13 @@ package org.askforai.user;
 
 import java.util.Optional;
 
+import org.askforai._core.exception.custom.Exception404;
 import org.askforai._core.exception.custom.Exception409;
 import org.askforai._core.util.BCryptUtil;
+import org.askforai._core.util.JwtUtil;
 import org.springframework.stereotype.Service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,6 +19,7 @@ public class UserService {
 	
 	private final UserRepository userRepository;
 	private final BCryptUtil bCryptUtil;
+	private final JwtUtil jwtUtil;
 	
 	public User signup(UserRequest.SignupDTO reqDTO) {
 		log.info("회원가입 시도: {}", reqDTO);
@@ -40,4 +44,32 @@ public class UserService {
 		return userRepository.save(user);
 	}
 
+	public String signin(UserRequest.SigninDTO reqDTO, HttpServletRequest request) {
+        log.info("로그인 시도: {}", reqDTO);
+        
+        // 사용자 조회
+        User user = userRepository.findByUsername(reqDTO.getUsername())
+                .orElseThrow(() -> new Exception404("username 혹은 password가 일치하지 않습니다."));
+        
+        // 비밀번호 검증
+        if (bCryptUtil.matches(reqDTO.getPassword(), user.getPassword())) {
+            // 현재 액세스 토큰 가져오기
+            String authorizationHeader = request.getHeader("Authorization");
+            String currentToken = null;
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                currentToken = authorizationHeader.substring(7);
+            }
+
+            // 현재 토큰이 유효한지 검사
+            if (currentToken != null && jwtUtil.validateToken(currentToken, user.getUsername())) {
+                return currentToken;
+            } else {
+                // 새로운 액세스 토큰 발급
+                return jwtUtil.generateAccessToken(user.getUsername());
+            }
+        } else {
+            throw new Exception404("username 혹은 password가 일치하지 않습니다.");
+        }
+    }
+	
 }
