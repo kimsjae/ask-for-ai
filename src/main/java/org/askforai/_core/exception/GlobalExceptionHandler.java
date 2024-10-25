@@ -4,6 +4,7 @@ import org.askforai._core.exception.custom.Exception400;
 import org.askforai._core.exception.custom.Exception401;
 import org.askforai._core.exception.custom.Exception403;
 import org.askforai._core.exception.custom.Exception404;
+import org.askforai._core.exception.custom.Exception409;
 import org.askforai._core.exception.custom.Exception500;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +46,15 @@ public class GlobalExceptionHandler {
         log.warn("404 오류 발생: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
+    
+    // 중복
+    @ExceptionHandler(Exception409.class)
+    public ResponseEntity<String> ex404(Exception409 ex) {
+        log.warn("409 오류 발생: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
                 .body(ex.getMessage());
     }
     
