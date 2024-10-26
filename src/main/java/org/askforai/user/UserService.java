@@ -2,11 +2,14 @@ package org.askforai.user;
 
 import java.util.Optional;
 
+import org.askforai._core.exception.custom.Exception400;
+import org.askforai._core.exception.custom.Exception403;
 import org.askforai._core.exception.custom.Exception404;
 import org.askforai._core.exception.custom.Exception409;
 import org.askforai._core.util.BCryptUtil;
 import org.askforai._core.util.JwtUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
 	
 	private final UserRepository userRepository;
@@ -71,5 +75,22 @@ public class UserService {
             throw new Exception404("username 혹은 password가 일치하지 않습니다.");
         }
     }
+	
+	public void withdraw(UserRequest.WithdrawDTO reqDTO, HttpServletRequest request) {
+		String token = request.getHeader("Authorization").substring(7);
+		String username = jwtUtil.extractUsername(token);
+		
+		User user = userRepository.findByUsername(username)
+				.orElseThrow(() -> new Exception403("권한없음."));
+		
+		if (bCryptUtil.matches(reqDTO.getPassword(), user.getPassword())) {
+			userRepository.deleteById(user.getId());
+			log.info("탈퇴 성공: {}", user);
+			
+        } else {
+        	log.warn("탈퇴 실패: {}", user);
+            throw new Exception400("탈퇴 실패: 비밀번호가 일치하지 않습니다.");
+        }
+	}
 	
 }

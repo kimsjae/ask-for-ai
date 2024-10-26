@@ -21,7 +21,6 @@ public class UserRequest {
 		private String name;
 		
 		@NotBlank(message = "email을 입력하세요.")
-		@Size(min = 4, max = 12, message = "email은 4자 이상 12자 이하입니다.")
 		private String email;
 	}
 	
@@ -33,6 +32,12 @@ public class UserRequest {
 		
 		@NotBlank(message = "password을 입력하세요.")
 		@Size(min = 4, max = 12, message = "password는 4자 이상 12자 이하입니다.")
+		private String password;
+	}
+	
+	@Data
+	public static class WithdrawDTO {
+		@NotBlank(message = "password을 입력하세요.")
 		private String password;
 	}
 	
