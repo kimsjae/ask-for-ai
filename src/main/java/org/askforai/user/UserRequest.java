@@ -27,11 +27,9 @@ public class UserRequest {
 	@Data
 	public static class SigninDTO {
 		@NotBlank(message = "username을 입력하세요.")
-		@Size(min = 4, max = 12, message = "username은 4자 이상 12자 이하입니다.")
 		private String username;
 		
 		@NotBlank(message = "password을 입력하세요.")
-		@Size(min = 4, max = 12, message = "password는 4자 이상 12자 이하입니다.")
 		private String password;
 	}
 	

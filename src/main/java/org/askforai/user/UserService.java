@@ -11,7 +11,6 @@ import org.askforai._core.util.JwtUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,7 +47,7 @@ public class UserService {
 		return userRepository.save(user);
 	}
 
-	public String signin(UserRequest.SigninDTO reqDTO, HttpServletRequest request) {
+	public String signin(UserRequest.SigninDTO reqDTO, String existingToken) {
         log.info("로그인 시도: {}", reqDTO);
         
         // 사용자 조회
@@ -56,41 +55,30 @@ public class UserService {
                 .orElseThrow(() -> new Exception404("username 혹은 password가 일치하지 않습니다."));
         
         // 비밀번호 검증
-        if (bCryptUtil.matches(reqDTO.getPassword(), user.getPassword())) {
-            // 현재 액세스 토큰 가져오기
-            String authorizationHeader = request.getHeader("Authorization");
-            String currentToken = null;
-            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-                currentToken = authorizationHeader.substring(7);
-            }
-
-            // 현재 토큰이 유효한지 검사
-            if (currentToken != null && jwtUtil.validateToken(currentToken, user.getUsername())) {
-                return currentToken;
+        if (bCryptUtil.matches(reqDTO.getPassword(), user.getPassword())) {        	
+        	if (existingToken != null && jwtUtil.validateToken(existingToken, user.getUsername())) {
+                return existingToken; // 유효한 토큰 사용
             } else {
-                // 새로운 액세스 토큰 발급
-                return jwtUtil.generateAccessToken(user.getUsername());
+                return jwtUtil.generateAccessToken(user.getUsername()); // 새로운 토큰 발급
             }
         } else {
             throw new Exception404("username 혹은 password가 일치하지 않습니다.");
         }
     }
 	
-	public void withdraw(UserRequest.WithdrawDTO reqDTO, HttpServletRequest request) {
-		String token = request.getHeader("Authorization").substring(7);
-		String username = jwtUtil.extractUsername(token);
+	public void withdraw(UserRequest.WithdrawDTO reqDTO, String username) {
+		log.info("회원탈퇴 시도: {}", reqDTO);
 		
 		User user = userRepository.findByUsername(username)
 				.orElseThrow(() -> new Exception403("권한없음."));
 		
 		if (bCryptUtil.matches(reqDTO.getPassword(), user.getPassword())) {
 			userRepository.deleteById(user.getId());
-			log.info("탈퇴 성공: {}", user);
-			
         } else {
         	log.warn("탈퇴 실패: {}", user);
             throw new Exception400("탈퇴 실패: 비밀번호가 일치하지 않습니다.");
         }
 	}
+	
 	
 }

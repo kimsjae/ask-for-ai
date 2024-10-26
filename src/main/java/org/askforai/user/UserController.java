@@ -1,5 +1,6 @@
 package org.askforai.user;
 
+import org.askforai._core.util.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 	
 	private final UserService userService;
+	private final JwtUtil jwtUtil;
 	
 	@PostMapping("/users")
 	public ResponseEntity<?> signup(@Valid @RequestBody UserRequest.SignupDTO reqDTO) {
@@ -26,16 +28,28 @@ public class UserController {
 	
 	@PostMapping("/signin")
 	public ResponseEntity<String> signin(@Valid @RequestBody UserRequest.SigninDTO reqDTO, HttpServletRequest request) {
-        String token = userService.signin(reqDTO, request);
+		String authorizationHeader = request.getHeader("Authorization");
+        String existingToken = null;
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            existingToken = authorizationHeader.substring(7);
+        }
+        
+        String token = userService.signin(reqDTO, existingToken);
         
         return ResponseEntity.ok(token);
     }
 	
 	@DeleteMapping("/withdraw")
 	public ResponseEntity<?> withdraw(@Valid @RequestBody UserRequest.WithdrawDTO reqDTO, HttpServletRequest request) {
-		userService.withdraw(reqDTO, request);
+		String token = request.getHeader("Authorization").substring(7);
+        String username = jwtUtil.extractUsername(token);
+        
+		userService.withdraw(reqDTO, username);
 		
 		return ResponseEntity.noContent().build();
 	}
+	
+	
 
 }
