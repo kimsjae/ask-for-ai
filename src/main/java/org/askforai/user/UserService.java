@@ -55,30 +55,54 @@ public class UserService {
                 .orElseThrow(() -> new Exception404("username 혹은 password가 일치하지 않습니다."));
         
         // 비밀번호 검증
-        if (bCryptUtil.matches(reqDTO.getPassword(), user.getPassword())) {        	
-        	if (existingToken != null && jwtUtil.validateToken(existingToken, user.getUsername())) {
-                return existingToken; // 유효한 토큰 사용
-            } else {
-                return jwtUtil.generateAccessToken(user.getUsername()); // 새로운 토큰 발급
+        if (bCryptUtil.matches(reqDTO.getPassword(), user.getPassword())) {
+            
+            // 기존 토큰 검증
+            if (existingToken != null) {
+                // 토큰 유효성 검증
+                if (jwtUtil.validateToken(existingToken)) {
+                    // 인증 성공: 유효한 토큰을 사용
+                    return existingToken; 
+                } else {
+                    // 유효하지 않은 토큰 처리 (예: 로그아웃 등)
+                    log.warn("유효하지 않은 토큰: {}", existingToken);
+                }
             }
+
+            // 새로운 액세스 토큰 발급
+            return jwtUtil.generateAccessToken(user.getUsername());
         } else {
             throw new Exception404("username 혹은 password가 일치하지 않습니다.");
         }
     }
 	
-	public void withdraw(UserRequest.WithdrawDTO reqDTO, String username) {
+	public void withdraw(UserRequest.WithdrawDTO reqDTO, String token) {
 		log.info("회원탈퇴 시도: {}", reqDTO);
 		
+		String username = jwtUtil.extractUsername(token);
 		User user = userRepository.findByUsername(username)
-				.orElseThrow(() -> new Exception403("권한없음."));
+				.orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
 		
 		if (bCryptUtil.matches(reqDTO.getPassword(), user.getPassword())) {
 			userRepository.deleteById(user.getId());
+			
         } else {
         	log.warn("탈퇴 실패: {}", user);
             throw new Exception400("탈퇴 실패: 비밀번호가 일치하지 않습니다.");
         }
 	}
 	
+	@Transactional(readOnly = true)
+	public User getUserInfo(String token) {
+		if (!jwtUtil.validateToken(token)) {
+			throw new Exception403("유효하지 않은 토큰입니다.");
+		}
+		
+		String username = jwtUtil.extractUsername(token);
+		User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
+
+        return user;
+	}
 	
 }

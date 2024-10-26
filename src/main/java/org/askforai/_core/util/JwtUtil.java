@@ -10,6 +10,7 @@ import javax.crypto.SecretKey;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -49,9 +50,21 @@ public class JwtUtil {
     }
 
     // JWT 유효성 검사
-    public boolean validateToken(String token, String username) {
-        final String extractedUsername = extractUsername(token);
-        return (extractedUsername.equals(username) && !isTokenExpired(token));
+    public boolean validateToken(String token) {
+    	return !isTokenExpired(token) && isSignatureValid(token);
+    }
+    
+    // JWT 서명 유효성 검사
+    public boolean isSignatureValid(String token) {
+        try {
+            Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY) // Secret Key 설정
+                .build()
+                .parseClaimsJws(token); // 서명 검증
+            return true; // 서명이 유효한 경우
+        } catch (JwtException e) {
+            return false; // 서명이 유효하지 않은 경우
+        }
     }
 
     // JWT에서 사용자 이름 추출

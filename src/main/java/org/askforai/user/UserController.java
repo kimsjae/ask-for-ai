@@ -1,9 +1,9 @@
 package org.askforai.user;
 
-import org.askforai._core.util.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 	
 	private final UserService userService;
-	private final JwtUtil jwtUtil;
 	
 	@PostMapping("/users")
 	public ResponseEntity<?> signup(@Valid @RequestBody UserRequest.SignupDTO reqDTO) {
@@ -43,13 +42,19 @@ public class UserController {
 	@DeleteMapping("/withdraw")
 	public ResponseEntity<?> withdraw(@Valid @RequestBody UserRequest.WithdrawDTO reqDTO, HttpServletRequest request) {
 		String token = request.getHeader("Authorization").substring(7);
-        String username = jwtUtil.extractUsername(token);
         
-		userService.withdraw(reqDTO, username);
+		userService.withdraw(reqDTO, token);
 		
 		return ResponseEntity.noContent().build();
 	}
 	
-	
+	@GetMapping("/users/me")
+    public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").substring(7);
+
+        // 사용자 정보 조회
+        User userInfo = userService.getUserInfo(token);
+        return ResponseEntity.ok(userInfo); // 200 OK
+    }
 
 }

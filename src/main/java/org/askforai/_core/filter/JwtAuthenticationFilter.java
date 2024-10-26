@@ -48,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         	UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         	
         	// JWT가 유효한지 확인
-        	if (jwtUtil.validateToken(jwt, userDetails.getUsername())) {
+        	if (jwtUtil.validateToken(jwt)) {
         		
                 // 인증 객체 생성
                 UsernamePasswordAuthenticationToken authentication = 
