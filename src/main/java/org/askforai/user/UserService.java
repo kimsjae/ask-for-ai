@@ -48,33 +48,32 @@ public class UserService {
 	}
 
 	public String signin(UserRequest.SigninDTO reqDTO, String existingToken) {
-        log.info("로그인 시도: {}", reqDTO);
-        
-        // 사용자 조회
-        User user = userRepository.findByUsername(reqDTO.getUsername())
-                .orElseThrow(() -> new Exception404("username 혹은 password가 일치하지 않습니다."));
-        
-        // 비밀번호 검증
-        if (bCryptUtil.matches(reqDTO.getPassword(), user.getPassword())) {
-            
-            // 기존 토큰 검증
-            if (existingToken != null) {
-                // 토큰 유효성 검증
-                if (jwtUtil.validateToken(existingToken)) {
-                    // 인증 성공: 유효한 토큰을 사용
-                    return existingToken; 
-                } else {
-                    // 유효하지 않은 토큰 처리 (예: 로그아웃 등)
-                    log.warn("유효하지 않은 토큰: {}", existingToken);
-                }
-            }
+	    log.info("로그인 시도: {}", reqDTO);
+	    
+	    // 기존 토큰 검증
+	    if (existingToken != null) {
+	        // 토큰 유효성 검증
+	        if (jwtUtil.validateToken(existingToken)) {
+	            // 유효한 토큰 사용
+	            return existingToken; 
+	        } else {
+	            // 유효하지 않은 토큰 처리 (예: 로그아웃 등)
+	            log.warn("유효하지 않은 토큰: {}", existingToken);
+	        }
+	    }
 
-            // 새로운 액세스 토큰 발급
-            return jwtUtil.generateAccessToken(user.getUsername());
-        } else {
-            throw new Exception404("username 혹은 password가 일치하지 않습니다.");
-        }
-    }
+	    // 사용자 조회
+	    User user = userRepository.findByUsername(reqDTO.getUsername())
+	            .orElseThrow(() -> new Exception404("username 혹은 password가 일치하지 않습니다."));
+
+	    // 비밀번호 검증
+	    if (bCryptUtil.matches(reqDTO.getPassword(), user.getPassword())) {
+	        // 새로운 액세스 토큰 발급
+	        return jwtUtil.generateAccessToken(user.getUsername());
+	    } else {
+	        throw new Exception404("username 혹은 password가 일치하지 않습니다.");
+	    }
+	}
 	
 	public void withdraw(UserRequest.WithdrawDTO reqDTO, String token) {
 		log.info("회원탈퇴 시도: {}", reqDTO);
