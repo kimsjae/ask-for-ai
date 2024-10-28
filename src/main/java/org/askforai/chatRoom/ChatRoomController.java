@@ -34,4 +34,12 @@ public class ChatRoomController {
 		return ResponseEntity.status(HttpStatus.OK).body(chatRoomList);
 	}
 	
+	// 즐겨찾는 채팅방 목록보기
+	@GetMapping("/me/favorite")
+	public ResponseEntity<?> getFavoriteChatRoomByUserId() {
+		List<ChatRoom> favoriteChatRoomList = chatRoomService.getFavoriteChatRoomByUserId();
+		
+		return ResponseEntity.status(HttpStatus.OK).body(favoriteChatRoomList);
+	}
+	
 }

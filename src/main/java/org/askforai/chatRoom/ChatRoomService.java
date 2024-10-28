@@ -47,5 +47,20 @@ public class ChatRoomService {
 			throw new Exception403("권한 없음.");
 		}
 	}
+	
+	// 즐겨찾는 채팅방 목록보기
+	@Transactional(readOnly = true)
+	public List<ChatRoom> getFavoriteChatRoomByUserId() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null) {
+			Long userId = ((CustomUserDetails) auth.getPrincipal()).getId();
+			
+			List<ChatRoom> favoriteChatRoomList = chatRoomRepository.findFavoriteChatRoomByUserId(userId);
+			
+			return favoriteChatRoomList;
+		} else {
+			throw new Exception403("권한 없음.");
+		}
+	}
 
 }
