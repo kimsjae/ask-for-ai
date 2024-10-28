@@ -3,6 +3,7 @@ package org.askforai.chatRoom;
 import java.util.List;
 
 import org.askforai._core.exception.custom.Exception403;
+import org.askforai._core.exception.custom.Exception404;
 import org.askforai.user.CustomUserDetails;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -58,6 +59,22 @@ public class ChatRoomService {
 			List<ChatRoom> favoriteChatRoomList = chatRoomRepository.findFavoriteChatRoomByUserId(userId);
 			
 			return favoriteChatRoomList;
+		} else {
+			throw new Exception403("권한 없음.");
+		}
+	}
+	
+	// 채팅방 즐겨찾기 on/off
+	public void toggleFavoriteStatus(ChatRoomRequest.FavoriteDTO reqDTO) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null) {
+			ChatRoom chatRoom = chatRoomRepository.findById(reqDTO.getChatRoomId())
+					.orElseThrow(() -> new Exception404("존재하지 않는 채팅방입니다."));
+			
+			chatRoom.setFavorite(!chatRoom.isFavorite());
+			
+			chatRoomRepository.save(chatRoom);
+			
 		} else {
 			throw new Exception403("권한 없음.");
 		}
