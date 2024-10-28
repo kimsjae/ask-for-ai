@@ -65,7 +65,7 @@ public class ChatRoomService {
 	}
 	
 	// 채팅방 즐겨찾기 on/off
-	public void toggleFavoriteStatus(ChatRoomRequest.FavoriteDTO reqDTO) {
+	public void toggleFavoriteStatus(ChatRoomRequest.ChatRoomIdDTO reqDTO) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth != null) {
 			ChatRoom chatRoom = chatRoomRepository.findById(reqDTO.getChatRoomId())
@@ -90,6 +90,17 @@ public class ChatRoomService {
 			chatRoom.setTitle(reqDTO.getTitle());
 			
 			chatRoomRepository.save(chatRoom);
+			
+		} else {
+			throw new Exception403("권한 없음.");
+		}
+	}
+	
+	// 채팅방 삭제하기
+	public void deleteChatRoom(ChatRoomRequest.ChatRoomIdDTO reqDTO) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null) {
+			chatRoomRepository.deleteById(reqDTO.getChatRoomId());
 			
 		} else {
 			throw new Exception403("권한 없음.");

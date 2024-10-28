@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,7 +47,7 @@ public class ChatRoomController {
 	
 	// 채팅방 즐겨찾기 on/off
 	@PatchMapping("/me/favorite")
-	public ResponseEntity<?> toggleFavoriteStatus(@RequestBody ChatRoomRequest.FavoriteDTO reqDTO) {
+	public ResponseEntity<?> toggleFavoriteStatus(@RequestBody ChatRoomRequest.ChatRoomIdDTO reqDTO) {
 		chatRoomService.toggleFavoriteStatus(reqDTO);
 		
 		return ResponseEntity.ok("즐겨찾기 변경 완료");
@@ -58,6 +59,14 @@ public class ChatRoomController {
 		chatRoomService.updateChatRoomTitle(reqDTO);
 		
 		return ResponseEntity.ok("채팅방 이름 변경 완료");
+	}
+	
+	// 채팅방 삭제하기
+	@DeleteMapping("/me")
+	public ResponseEntity<?> deleteChatRoom(@RequestBody ChatRoomRequest.ChatRoomIdDTO reqDTO) {
+		chatRoomService.deleteChatRoom(reqDTO);
+		
+		return ResponseEntity.ok("채팅방 삭제 성공");
 	}
 	
 }

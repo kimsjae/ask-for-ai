@@ -5,7 +5,7 @@ import lombok.Data;
 public class ChatRoomRequest {
 	
 	@Data
-	public static class FavoriteDTO {
+	public static class ChatRoomIdDTO {
 		private Long chatRoomId;
 	}
 	
