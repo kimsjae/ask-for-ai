@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.crypto.SecretKey;
 
+import org.askforai.user.User;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -28,8 +29,8 @@ public class JwtUtil {
     }
 
     // Access Token 생성
-    public String generateAccessToken(String username) {
-        return createToken(username, ACCESS_TOKEN_VALIDITY);
+    public String generateAccessToken(User user) {
+        return createToken(user, ACCESS_TOKEN_VALIDITY);
     }
 
 //    // Refresh Token 생성
@@ -38,11 +39,13 @@ public class JwtUtil {
 //    }
     
     // JWT 생성 시 클레임 설정
-    private String createToken(String username, long validity) {
+    private String createToken(User user, long validity) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("id", user.getId());
+        claims.put("username", user.getUsername());
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(username)
+                .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + validity))
                 .signWith(SECRET_KEY, SignatureAlgorithm.HS256) // Secret Key와 알고리즘 설정
@@ -65,6 +68,11 @@ public class JwtUtil {
         } catch (JwtException e) {
             return false; // 서명이 유효하지 않은 경우
         }
+    }
+    
+    // JWT에서 사용자 ID 추출
+    public Long extractUserId(String token) {
+        return extractAllClaims(token).get("id", Long.class);
     }
 
     // JWT에서 사용자 이름 추출

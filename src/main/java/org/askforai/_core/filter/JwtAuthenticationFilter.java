@@ -3,11 +3,11 @@ package org.askforai._core.filter;
 import java.io.IOException;
 
 import org.askforai._core.util.JwtUtil;
+import org.askforai.user.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -29,7 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
     
     @Autowired
-    private UserDetailsService userDetailsService;
+    private CustomUserDetailsService customUserDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -47,11 +47,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // JWT가 유효한 경우 사용자 인증 처리
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-        	UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        	
         	// JWT가 유효한지 확인
-        	if (jwtUtil.validateToken(jwt)) {
-        		
+            if (jwtUtil.validateToken(jwt)) {
+                // 사용자 정보 로드
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+                
                 // 인증 객체 생성
                 UsernamePasswordAuthenticationToken authentication = 
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

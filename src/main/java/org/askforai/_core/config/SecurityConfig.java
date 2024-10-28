@@ -3,6 +3,7 @@ package org.askforai._core.config;
 import org.askforai._core.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -30,7 +31,8 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/users", "/signin", "/h2-console/**").permitAll() // 인증 없이 접근 가능한 경로
+        		.requestMatchers(HttpMethod.POST, "/users", "/signin").permitAll()	
+                .requestMatchers("/h2-console/**").permitAll() // 인증 없이 접근 가능한 경로
                 .anyRequest().authenticated() // 나머지 경로는 인증 필요
             )
             .headers(headers -> headers

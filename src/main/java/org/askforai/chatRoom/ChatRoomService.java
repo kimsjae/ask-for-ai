@@ -1,33 +1,51 @@
 package org.askforai.chatRoom;
 
+import java.util.List;
+
 import org.askforai._core.exception.custom.Exception403;
-import org.askforai.user.User;
-import org.askforai.user.UserRepository;
+import org.askforai.user.CustomUserDetails;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ChatRoomService {
 	
 	private final ChatRoomRepository chatRoomRepository;
-	private final UserRepository userRepository;
 	
 	public ChatRoom createChatRoom() {
-	    String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-	    // 사용자 정보 조회
-	    User user = userRepository.findByUsername(username)
-	            .orElseThrow(() -> new Exception403("유효하지 않은 사용자입니다."));
-
-	    // 새 채팅방 생성
-	    ChatRoom chatRoom = ChatRoom.builder()
-	            .user(user)
-	            .build();
-
-	    return chatRoomRepository.save(chatRoom);
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null) {
+			Long userId = ((CustomUserDetails) auth.getPrincipal()).getId();
+			
+			ChatRoom chatRoom = ChatRoom.builder()
+					.userId(userId)
+					.build();
+			
+			return chatRoomRepository.save(chatRoom);
+		} else {
+			throw new Exception403("권한 없음.");
+		}
+	}
+	
+	// 채팅방 목록
+	@Transactional(readOnly = true)
+	public List<ChatRoom> getChatRoomsByUserId() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null) {
+			Long userId = ((CustomUserDetails) auth.getPrincipal()).getId();
+			
+			List<ChatRoom> chatRoomList = chatRoomRepository.findChatRoomsByUserId(userId);
+			
+			return chatRoomList;
+		} else {
+			throw new Exception403("권한 없음.");
+		}
 	}
 
 }

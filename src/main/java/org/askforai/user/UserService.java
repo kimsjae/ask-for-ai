@@ -70,7 +70,7 @@ public class UserService {
 	    // 비밀번호 검증
 	    if (bCryptUtil.matches(reqDTO.getPassword(), user.getPassword())) {
 	        // 새로운 액세스 토큰 발급
-	        return jwtUtil.generateAccessToken(user.getUsername());
+	        return jwtUtil.generateAccessToken(user);
 	    } else {
 	        throw new Exception404("username 혹은 password가 일치하지 않습니다.");
 	    }
