@@ -1,16 +1,24 @@
 package org.askforai._core.config;
 
+import org.askforai._core.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
+	
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
     
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -22,13 +30,15 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/**").permitAll() // 인증 없이 접근 가능한 경로
-                .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/users", "/signin", "/h2-console/**").permitAll() // 인증 없이 접근 가능한 경로
                 .anyRequest().authenticated() // 나머지 경로는 인증 필요
             )
             .headers(headers -> headers
-                    .disable() // 모든 헤더 보호 비활성화 (H2 콘솔 접근을 위한 설정)
-                );
+                    .xssProtection(xss -> xss.disable()) // 필요 시 XSS 보호 비활성화
+                    .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin) // H2 콘솔을 위한 설정
+                )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        
         return http.build();
     }
 }

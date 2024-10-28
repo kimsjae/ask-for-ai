@@ -3,11 +3,12 @@ package org.askforai.user;
 import java.util.Optional;
 
 import org.askforai._core.exception.custom.Exception400;
-import org.askforai._core.exception.custom.Exception403;
 import org.askforai._core.exception.custom.Exception404;
 import org.askforai._core.exception.custom.Exception409;
 import org.askforai._core.util.BCryptUtil;
 import org.askforai._core.util.JwtUtil;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,33 +76,28 @@ public class UserService {
 	    }
 	}
 	
-	public void withdraw(UserRequest.WithdrawDTO reqDTO, String token) {
-		log.info("회원탈퇴 시도: {}", reqDTO);
-		
-		String username = jwtUtil.extractUsername(token);
-		User user = userRepository.findByUsername(username)
-				.orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
-		
-		if (bCryptUtil.matches(reqDTO.getPassword(), user.getPassword())) {
-			userRepository.deleteById(user.getId());
-			
-        } else {
-        	log.warn("탈퇴 실패: {}", user);
-            throw new Exception400("탈퇴 실패: 비밀번호가 일치하지 않습니다.");
-        }
+	public void withdraw(UserRequest.WithdrawDTO reqDTO) {
+	    log.info("회원탈퇴 시도: {}", reqDTO);
+
+	    String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+	    User user = userRepository.findByUsername(username)
+	            .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
+
+	    if (bCryptUtil.matches(reqDTO.getPassword(), user.getPassword())) {
+	        userRepository.deleteById(user.getId());
+	    } else {
+	        log.warn("탈퇴 실패: {}", user);
+	        throw new Exception400("탈퇴 실패: 비밀번호가 일치하지 않습니다.");
+	    }
 	}
 	
 	@Transactional(readOnly = true)
-	public User getUserInfo(String token) {
-		if (!jwtUtil.validateToken(token)) {
-			throw new Exception403("유효하지 않은 토큰입니다.");
-		}
-		
-		String username = jwtUtil.extractUsername(token);
-		User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
+	public User getUserInfo() {
+	    String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+	    User user = userRepository.findByUsername(username)
+	            .orElseThrow(() -> new Exception404("사용자를 찾을 수 없습니다."));
 
-        return user;
+	    return user;
 	}
 	
 }

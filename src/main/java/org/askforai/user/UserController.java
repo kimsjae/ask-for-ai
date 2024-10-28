@@ -40,21 +40,17 @@ public class UserController {
     }
 	
 	@DeleteMapping("/withdraw")
-	public ResponseEntity<?> withdraw(@Valid @RequestBody UserRequest.WithdrawDTO reqDTO, HttpServletRequest request) {
-		String token = request.getHeader("Authorization").substring(7);
-        
-		userService.withdraw(reqDTO, token);
-		
-		return ResponseEntity.noContent().build();
+	public ResponseEntity<?> withdraw(@Valid @RequestBody UserRequest.WithdrawDTO reqDTO) {
+	    userService.withdraw(reqDTO);
+	    
+	    return ResponseEntity.noContent().build();
 	}
 	
 	@GetMapping("/users/me")
-    public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
-        String token = request.getHeader("Authorization").substring(7);
-
-        // 사용자 정보 조회
-        User userInfo = userService.getUserInfo(token);
-        return ResponseEntity.ok(userInfo); // 200 OK
-    }
+	public ResponseEntity<?> getUserInfo() {
+	    User userInfo = userService.getUserInfo();
+	    
+	    return ResponseEntity.ok(userInfo);
+	}
 
 }
