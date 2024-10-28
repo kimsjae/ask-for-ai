@@ -52,4 +52,12 @@ public class ChatRoomController {
 		return ResponseEntity.ok("즐겨찾기 변경 완료");
 	}
 	
+	// 채팅방 이름 수정하기
+	@PatchMapping("/me/title")
+	public ResponseEntity<?> updateTitle(@RequestBody ChatRoomRequest.RenameDTO reqDTO) {
+		chatRoomService.updateChatRoomTitle(reqDTO);
+		
+		return ResponseEntity.ok("채팅방 이름 변경 완료");
+	}
+	
 }

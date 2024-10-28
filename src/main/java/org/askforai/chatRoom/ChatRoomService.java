@@ -79,5 +79,21 @@ public class ChatRoomService {
 			throw new Exception403("권한 없음.");
 		}
 	}
+	
+	// 채팅방 이름 수정하기
+	public void updateChatRoomTitle(ChatRoomRequest.RenameDTO reqDTO) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null) {
+			ChatRoom chatRoom = chatRoomRepository.findById(reqDTO.getChatRoomId())
+					.orElseThrow(() -> new Exception404("존재하지 않는 채팅방입니다."));
+			
+			chatRoom.setTitle(reqDTO.getTitle());
+			
+			chatRoomRepository.save(chatRoom);
+			
+		} else {
+			throw new Exception403("권한 없음.");
+		}
+	}
 
 }

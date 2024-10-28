@@ -9,4 +9,10 @@ public class ChatRoomRequest {
 		private Long chatRoomId;
 	}
 	
+	@Data
+	public static class RenameDTO {
+		private Long chatRoomId;
+		private String title;
+	}
+	
 }
