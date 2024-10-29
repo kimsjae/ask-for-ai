@@ -34,6 +34,21 @@ public class ChatRoomService {
 		}
 	}
 	
+	// 해당 채팅방 조회
+	@Transactional(readOnly = true)
+	public ChatRoom getChatRoomById(Long chatRoomId) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth != null) {
+			ChatRoom chatRoom = chatRoomRepository.findById(chatRoomId)
+					.orElseThrow(() -> new Exception404("존재하지 않는 채팅방입니다."));
+			
+			return chatRoom;
+			
+		} else {
+			throw new Exception403("권한 없음.");
+		}
+	}
+	
 	// 채팅방 목록
 	@Transactional(readOnly = true)
 	public List<ChatRoom> getChatRoomsByUserId() {
