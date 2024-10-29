@@ -1,7 +1,5 @@
 package org.askforai.message;
 
-import java.time.LocalDateTime;
-
 import lombok.Data;
 
 public class MessageResponse {
@@ -18,7 +16,7 @@ public class MessageResponse {
 		private String title;
 		private Sender sender;
 		private String content;
-		private LocalDateTime timestamp;
+		private String timestamp;
 	}
 	
 }

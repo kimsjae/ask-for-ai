@@ -1,5 +1,6 @@
 package org.askforai.message;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,6 +45,7 @@ public class MessageController {
 	@GetMapping
 	public ResponseEntity<List<MessageResponse.MessagesDTO>> getMessage(@RequestBody MessageRequest.ChatRoomIdDTO reqDTO) {
 	    List<Message> messageList = messageService.getMessage(reqDTO);
+	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 	    
 	    List<MessageResponse.MessagesDTO> messagesDTOList = messageList.stream().map(message -> {
 	        MessageResponse.MessagesDTO resDTO = new MessageResponse.MessagesDTO();
@@ -51,7 +53,7 @@ public class MessageController {
 	        resDTO.setTitle(message.getChatRoom().getTitle());
 	        resDTO.setSender(message.getSender());
 	        resDTO.setContent(message.getContent());
-	        resDTO.setTimestamp(message.getTimestamp());
+	        resDTO.setTimestamp(message.getTimestamp().format(formatter));
 	        return resDTO;
 	    }).collect(Collectors.toList());
 
