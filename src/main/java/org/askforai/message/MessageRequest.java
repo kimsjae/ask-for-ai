@@ -14,4 +14,8 @@ public class MessageRequest {
 		private LocalDateTime timestamp;
 	}
 	
+	@Data
+	public static class ChatRoomIdDTO {
+		private Long chatRoomId;
+	}
 }

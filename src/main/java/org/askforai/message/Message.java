@@ -30,7 +30,7 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	private ChatRoom chatRoom;
 	
 	private Sender sender;
