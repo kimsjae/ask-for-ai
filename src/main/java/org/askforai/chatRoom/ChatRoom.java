@@ -28,6 +28,7 @@ public class ChatRoom {
 	@Builder.Default
 	private String title = "새로운 채팅방";
 	
+	@ColumnDefault("false")
 	private boolean isFavorite;
 	
 	private Long userId;
