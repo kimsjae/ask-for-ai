@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.askforai._core.exception.custom.Exception403;
 import org.askforai._core.exception.custom.Exception404;
+import org.askforai.message.Message;
+import org.askforai.message.MessageRepository;
 import org.askforai.user.CustomUserDetails;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 public class ChatRoomService {
 	
 	private final ChatRoomRepository chatRoomRepository;
+	private final MessageRepository messageRepository;
 	
 	public ChatRoom createChatRoom() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -115,6 +118,11 @@ public class ChatRoomService {
 	public void deleteChatRoom(ChatRoomRequest.ChatRoomIdDTO reqDTO) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth != null) {
+			List<Message> messages = messageRepository.findByChatRoomId(reqDTO.getChatRoomId());
+			if (!messages.isEmpty()) {
+				messageRepository.deleteAll(messages);
+			}
+			
 			chatRoomRepository.deleteById(reqDTO.getChatRoomId());
 			
 		} else {
