@@ -1,7 +1,7 @@
 server:
   servlet:
     encoding:
-      charset: utf-8 # 한글.
+      charset: utf-8
       force: true
   port: 8080
 
@@ -19,23 +19,3 @@ spring:
     show-sql: true
     properties:
       hibernate.format_sql: true
-
-
-#spring:
-#  datasource:
-#    url: jdbc:h2:mem:testdb # H2 인메모리 데이터베이스를 사용.
-#    driver-class-name: org.h2.Driver # 데이터베이스 드라이버 클래스를 지정.
-#    username: sa
-#    password: ''
-#  h2:
-#    console:
-#      enabled: true # H2 콘솔을 활성화하여 웹 브라우저에서 데이터베이스 상태를 확인.
-#      path: /h2-console # H2 콘솔에 접근할 경로 지정.
-#  jpa:
-#    hibernate:
-#      ddl-auto: create # JPA에서 데이터베이스 테이블을 자동으로 생성하는 방식.
-#    show-sql: true # JPA가 실행하는 SQL 쿼리를 콘솔에 출력.
-#    open-in-view: false # JPA의 Lazy Loading을 비활성화하여 성능을 향상시킴.
-#    properties:
-#      hibernate:
-#        format_sql: true # 출력되는 SQL쿼리를 읽기 쉽게 들여쓰기를 적용하여 출력.

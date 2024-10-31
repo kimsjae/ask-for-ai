@@ -21,7 +21,6 @@ public class JwtUtil {
 
     private final SecretKey SECRET_KEY;
     private final long ACCESS_TOKEN_VALIDITY = 1000 * 60 * 60; // 1시간
-//    private final long REFRESH_TOKEN_VALIDITY = 1000 * 60 * 60 * 24 * 30; // 30일
 
     public JwtUtil() {
         String secretKeyEnv = System.getenv("JWT_SECRET_KEY");
@@ -32,11 +31,6 @@ public class JwtUtil {
     public String generateAccessToken(User user) {
         return createToken(user, ACCESS_TOKEN_VALIDITY);
     }
-
-//    // Refresh Token 생성
-//    public String generateRefreshToken(String username) {
-//        return createToken(username, REFRESH_TOKEN_VALIDITY);
-//    }
     
     // JWT 생성 시 클레임 설정
     private String createToken(User user, long validity) {

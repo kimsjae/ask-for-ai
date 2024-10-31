@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -31,14 +30,9 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화
             .authorizeHttpRequests(auth -> auth
-        		.requestMatchers(HttpMethod.POST, "/users", "/signin").permitAll()	
-                .requestMatchers("/h2-console/**").permitAll() // 인증 없이 접근 가능한 경로
+        		.requestMatchers(HttpMethod.POST, "/users", "/signin").permitAll()
                 .anyRequest().authenticated() // 나머지 경로는 인증 필요
             )
-            .headers(headers -> headers
-                    .xssProtection(xss -> xss.disable()) // 필요 시 XSS 보호 비활성화
-                    .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin) // H2 콘솔을 위한 설정
-                )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
