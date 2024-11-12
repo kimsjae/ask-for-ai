@@ -22,7 +22,6 @@
 <img src="https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white">
 <img src="https://img.shields.io/badge/Spring%20Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white">
 <img src="https://img.shields.io/badge/Hibernate-59666C?style=for-the-badge&logo=hibernate&logoColor=white">
-<img src="https://img.shields.io/badge/Mustache-000000?style=for-the-badge&logo=mustache&logoColor=white">
 
 ## Database
 <img src="https://img.shields.io/badge/H2-4479A1?style=for-the-badge&logo=h2&logoColor=white">
